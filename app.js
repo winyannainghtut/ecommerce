@@ -100,6 +100,7 @@ function attachUiEvents() {
 
 async function fetchAllProducts() {
   const response = await fetch(PRODUCTS_API_ENDPOINT, {
+    cache: "no-store",
     headers: {
       Accept: "application/json",
     },

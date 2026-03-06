@@ -28,7 +28,8 @@ module.exports = async function handler(req, res) {
 
   try {
     const products = await fetchProductsFromAirtable({ token, baseId, tableName });
-    res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=600");
+    // Always return fresh Airtable data for catalog updates.
+    res.setHeader("Cache-Control", "no-store, max-age=0");
     return res.status(200).json({ products });
   } catch (error) {
     console.error("Airtable proxy failed:", error);

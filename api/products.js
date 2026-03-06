@@ -100,6 +100,9 @@ function mapRecordToProduct(record) {
 }
 
 function pickText(value, fallback) {
+  if (Array.isArray(value) && value.length > 0) {
+    return String(value[0]).trim() || fallback;
+  }
   if (typeof value === "string" && value.trim()) {
     return value.trim();
   }

@@ -451,33 +451,38 @@ select {
 }
 
 /* ================================================================
-   CATEGORY MENU
+   CATEGORY MENU (SIDEBAR)
    ================================================================ */
+
+.inventory-categories {
+  margin-top: 28px;
+  margin-bottom: 24px;
+}
+
+.inventory-categories h3 {
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
 
 .category-menu {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-.category-menu::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari, Edge */
 }
 
 .category-btn {
-  white-space: nowrap;
-  padding: 8px 16px;
-  border-radius: 99px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  border-radius: 12px;
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-speed) ease;

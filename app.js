@@ -65,6 +65,8 @@ async function init() {
       return;
     }
 
+    applyTelegramLinks();
+
     state.products = await fetchAllProducts();
     renderCategoryMenu();
     applyFiltersAndRender();
@@ -251,7 +253,8 @@ async function fetchAllProducts() {
 
 function normalizeProduct(product) {
   const name = safeText(product.name, "Untitled product");
-  const price = safeText(product.price, "Price unavailable");
+  const rawPrice = safeText(product.price, "Price unavailable");
+  const price = formatPrice(rawPrice);
   const rawDescription = safeText(product.description, "");
   const description = cleanDescription(rawDescription);
   const imageUrl = safeText(product.imageUrl, "");
@@ -263,6 +266,7 @@ function normalizeProduct(product) {
     name,
     price,
     description,
+    category: safeText(product.category, "Uncategorized"),
     imageUrl: imageUrl || createFallbackImage(name),
     readyToOrder,
     telegramTarget,
@@ -285,6 +289,16 @@ function cleanDescription(text) {
 
   // Remove multiple consecutive empty lines
   return strippedLinks.replace(/\n\s*\n/g, "\n\n").trim();
+}
+
+function formatPrice(value) {
+  if (!value || value === "Price unavailable") return value;
+  // If the value is purely numeric (with optional commas/dots), append ကျပ်
+  const trimmed = value.trim();
+  if (/^[\d,.\s]+$/.test(trimmed)) {
+    return `${trimmed} ကျပ်`;
+  }
+  return trimmed;
 }
 
 function toBoolean(value) {

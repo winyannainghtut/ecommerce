@@ -4,21 +4,23 @@ A serverless shopping catalog that pulls products from Airtable and lets custome
 
 ## Features
 
+- **Dynamic Categories** — auto-generated category menu from the Airtable `Category` column; filter products instantly
+- **Product Detail Modal** — click any product image or "Details" button for an enlarged view with description
 - **Dark Mode** — toggle in topbar, persists in `localStorage`, auto-detects system preference
-- **Product Modal** — click any product image for an enlarged lightbox view
 - **Skeleton Loading** — shimmer placeholders while products load
 - **Scroll to Top** — fixed button appears after scrolling down
-- **Search Highlighting** — matching text highlighted in product names
+- **Search & Sort** — real-time search with highlighted matches; sort by name or price
 - **Retry on Error** — "Try Again" button on error states
 - **Responsive Design** — adapts to desktop, tablet, and mobile
+- **Glassmorphism UI** — frosted glass panels with animated background gradients
 
 ## Project Structure
 
 | File | Role |
 |---|---|
 | `index.html` | Page markup with product card & skeleton templates |
-| `style.css` | Styling with CSS variables, dark mode, responsive breakpoints |
-| `app.js` | Frontend logic — fetch, filter, sort, render, modal, theme |
+| `style.css` | Styling with CSS variables, dark mode, glassmorphism, responsive breakpoints |
+| `app.js` | Frontend logic — fetch, filter, sort, render, modal, theme, categories |
 | `api/products.js` | Serverless Airtable proxy (returns product JSON) |
 | `api/config.js` | Serverless config endpoint (returns Telegram username) |
 | `.env.local` | Local environment variables (git-ignored) |
@@ -34,7 +36,8 @@ A serverless shopping catalog that pulls products from Airtable and lets custome
 | `Name` | Text | Product name |
 | `Price` | Text | Display price (e.g. `100MMK`) |
 | `Photo` | Attachment | First image is used |
-| `Description` | Long text (optional) | Shown in product detail modal |
+| `Category` | Single select / Text | Category label (e.g. `Character keychains`, `Stationery`) |
+| `Description` | Long text | Shown in product detail modal |
 | `Ready to Order` | Checkbox | Enables the order button |
 | `Telegram Target` | Text (optional) | Per-product Telegram destination |
 
@@ -94,12 +97,13 @@ Open: `http://localhost:3000`
 ### 4. Verify
 
 1. Products load in the grid with skeleton placeholders during fetch
-2. Search filters products and highlights matching text
-3. Sort by name/price works
-4. Dark mode toggle persists across page reloads
-5. Clicking a product image opens the detail modal
-6. "Ready to Order" products open Telegram on order button click
-7. Products with `Telegram Target` use that destination; otherwise fallback to `TELEGRAM_USERNAME`
+2. Category pills appear in the left sidebar matching your Airtable `Category` values
+3. Search filters products and highlights matching text
+4. Sort by name/price works
+5. Dark mode toggle persists across page reloads
+6. Clicking a product image opens the detail modal with description
+7. "Ready to Order" products open Telegram on order button click
+8. Products with `Telegram Target` use that destination; otherwise fallback to `TELEGRAM_USERNAME`
 
 ## Deploy to Vercel
 

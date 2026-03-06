@@ -1,19 +1,18 @@
 /*
   FRONTEND CONFIG
   ------------------------------------------------------------------
-  Update only your Telegram username here.
-
-  Airtable credentials are now server-side only in Vercel Environment
-  Variables. Do NOT put Airtable token/Base ID in this file.
+  Telegram username and Airtable credentials are now server-side
+  only in Vercel Environment Variables / .env.local.
+  Do NOT put secrets in this file.
 */
 
-// Paste Telegram username only (without "@"), e.g. "your_store_username".
-const TELEGRAM_USERNAME = "your_store_username";
+const CONFIG_API_ENDPOINT = "/api/config";
 const PRODUCTS_API_ENDPOINT = "/api/products";
 
 const statusEl = document.getElementById("status");
 const productGridEl = document.getElementById("product-grid");
 const productCardTemplate = document.getElementById("product-card-template");
+const skeletonCardTemplate = document.getElementById("skeleton-card-template");
 const searchInputEl = document.getElementById("search-input");
 const sortSelectEl = document.getElementById("sort-select");
 const clearFiltersEl = document.getElementById("clear-filters");
@@ -21,29 +20,57 @@ const resultCountEl = document.getElementById("result-count");
 const totalMetricEl = document.getElementById("metric-total-products");
 const visibleMetricEl = document.getElementById("metric-visible-products");
 
+// Modal elements
+const modalOverlayEl = document.getElementById("product-modal");
+const modalCloseEl = document.getElementById("modal-close");
+const modalImageEl = document.getElementById("modal-image");
+const modalNameEl = document.getElementById("modal-name");
+const modalPriceEl = document.getElementById("modal-price");
+const modalBadgeEl = document.getElementById("modal-badge");
+const modalOrderEl = document.getElementById("modal-order");
+
+// Theme toggle
+const themeToggleEl = document.getElementById("theme-toggle");
+
+// Scroll to top
+const scrollTopEl = document.getElementById("scroll-top");
+
 const state = {
   products: [],
+  telegramUsername: "",
+  currentModalProduct: null,
 };
 
 init();
 
+/* ================================================================
+   INITIALIZATION
+   ================================================================ */
+
 async function init() {
   attachUiEvents();
-
-  if (!hasValidFrontendConfig()) {
-    showError("Update TELEGRAM_USERNAME in app.js before publishing.");
-    return;
-  }
-
-  applyTelegramLinks();
+  initTheme();
+  initScrollToTop();
 
   try {
     setLoadingState(true);
+
+    // Fetch config (Telegram username) from server
+    const config = await fetchConfig();
+    state.telegramUsername = config.telegramUsername || "";
+
+    if (!hasValidConfig()) {
+      showError("Set TELEGRAM_USERNAME in your Vercel environment variables or .env.local.");
+      return;
+    }
+
+    applyTelegramLinks();
+
     state.products = await fetchAllProducts();
     applyFiltersAndRender();
     setLoadingState(false);
   } catch (error) {
-    console.error("Failed to load products:", error);
+    console.error("Failed to load:", error);
     showError(
       error && error.message
         ? `Could not load products: ${error.message}`
@@ -52,13 +79,34 @@ async function init() {
   }
 }
 
-function hasValidFrontendConfig() {
-  const placeholder = "YOUR_TELEGRAM_USERNAME";
-  return TELEGRAM_USERNAME && TELEGRAM_USERNAME !== placeholder;
+function hasValidConfig() {
+  const placeholders = ["YOUR_TELEGRAM_USERNAME", "your_store_username", ""];
+  return !placeholders.includes(state.telegramUsername);
 }
 
+/* ================================================================
+   CONFIG FETCH
+   ================================================================ */
+
+async function fetchConfig() {
+  const response = await fetch(CONFIG_API_ENDPOINT, {
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Config API failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/* ================================================================
+   TELEGRAM LINKS
+   ================================================================ */
+
 function applyTelegramLinks() {
-  const cleanUsername = TELEGRAM_USERNAME.replace(/^@/, "").trim();
+  const cleanUsername = state.telegramUsername.replace(/^@/, "").trim();
   const telegramProfileUrl = `https://t.me/${cleanUsername}`;
 
   document.querySelectorAll("[data-telegram-link]").forEach((linkEl) => {
@@ -67,7 +115,7 @@ function applyTelegramLinks() {
 }
 
 function buildTelegramOrderUrl(product, message) {
-  const target = product.telegramTarget || TELEGRAM_USERNAME;
+  const target = product.telegramTarget || state.telegramUsername;
   const baseUrl = normalizeTelegramTarget(target);
   const separator = baseUrl.includes("?") ? "&" : "?";
   return `${baseUrl}${separator}text=${encodeURIComponent(message)}`;
@@ -76,7 +124,7 @@ function buildTelegramOrderUrl(product, message) {
 function normalizeTelegramTarget(value) {
   const trimmed = String(value || "").trim();
   if (!trimmed) {
-    return `https://t.me/${TELEGRAM_USERNAME.replace(/^@/, "").trim()}`;
+    return `https://t.me/${state.telegramUsername.replace(/^@/, "").trim()}`;
   }
 
   if (/^https?:\/\//i.test(trimmed)) {
@@ -87,6 +135,10 @@ function normalizeTelegramTarget(value) {
   return `https://t.me/${username}`;
 }
 
+/* ================================================================
+   UI EVENTS
+   ================================================================ */
+
 function attachUiEvents() {
   searchInputEl.addEventListener("input", applyFiltersAndRender);
   sortSelectEl.addEventListener("change", applyFiltersAndRender);
@@ -96,7 +148,67 @@ function attachUiEvents() {
     sortSelectEl.value = "featured";
     applyFiltersAndRender();
   });
+
+  // Modal events
+  modalCloseEl.addEventListener("click", closeModal);
+  modalOverlayEl.addEventListener("click", (e) => {
+    if (e.target === modalOverlayEl) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalOverlayEl.classList.contains("is-open")) {
+      closeModal();
+    }
+  });
 }
+
+/* ================================================================
+   DARK MODE
+   ================================================================ */
+
+function initTheme() {
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme) {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+
+  themeToggleEl.addEventListener("click", () => {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+  });
+
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    if (!localStorage.getItem("theme")) {
+      document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
+    }
+  });
+}
+
+/* ================================================================
+   SCROLL TO TOP
+   ================================================================ */
+
+function initScrollToTop() {
+  window.addEventListener("scroll", () => {
+    scrollTopEl.classList.toggle("is-visible", window.scrollY > 400);
+  }, { passive: true });
+
+  scrollTopEl.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
+/* ================================================================
+   DATA FETCHING
+   ================================================================ */
 
 async function fetchAllProducts() {
   const response = await fetch(PRODUCTS_API_ENDPOINT, {
@@ -170,6 +282,10 @@ function toBoolean(value) {
   return false;
 }
 
+/* ================================================================
+   FILTERS & SORTING
+   ================================================================ */
+
 function applyFiltersAndRender() {
   const searchValue = searchInputEl.value.trim().toLowerCase();
   const sortValue = sortSelectEl.value;
@@ -180,7 +296,7 @@ function applyFiltersAndRender() {
 
   visibleProducts = sortProducts(visibleProducts, sortValue);
 
-  renderProducts(visibleProducts, searchValue.length > 0);
+  renderProducts(visibleProducts, searchValue);
   updateCounters(visibleProducts.length, state.products.length);
 }
 
@@ -231,25 +347,57 @@ function parsePriceNumber(priceText) {
   return Number.isFinite(value) ? value : null;
 }
 
+/* ================================================================
+   COUNTERS
+   ================================================================ */
+
 function updateCounters(visibleCount, totalCount) {
   resultCountEl.textContent = `Showing ${visibleCount} of ${totalCount} products`;
-  totalMetricEl.textContent = String(totalCount);
-  visibleMetricEl.textContent = String(visibleCount);
+
+  animateCounter(totalMetricEl, totalCount);
+  animateCounter(visibleMetricEl, visibleCount);
 }
 
-function renderProducts(products, isFiltered) {
+function animateCounter(element, target) {
+  const current = parseInt(element.textContent, 10) || 0;
+
+  if (current === target) {
+    return;
+  }
+
+  const duration = 400;
+  const startTime = performance.now();
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const value = Math.round(current + (target - current) * eased);
+
+    element.textContent = String(value);
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+/* ================================================================
+   RENDERING
+   ================================================================ */
+
+function renderProducts(products, searchQuery) {
   productGridEl.innerHTML = "";
 
   if (!products.length) {
-    productGridEl.innerHTML = `
-      <div class="empty-state">
-        ${
-          isFiltered
-            ? "No products match your current search. Try a different keyword or reset filters."
-            : "No products were found in Airtable yet."
-        }
-      </div>
-    `;
+    const emptyDiv = document.createElement("div");
+    emptyDiv.className = "empty-state";
+    emptyDiv.textContent = searchQuery.length > 0
+      ? "No products match your current search. Try a different keyword or reset filters."
+      : "No products were found in Airtable yet.";
+    productGridEl.appendChild(emptyDiv);
     return;
   }
 
@@ -260,12 +408,19 @@ function renderProducts(products, isFiltered) {
     const nameEl = card.querySelector(".product-name");
     const priceEl = card.querySelector(".product-price");
     const orderButtonEl = card.querySelector(".order-button");
+    const mediaEl = card.querySelector(".card-media");
 
     imageEl.src = product.imageUrl;
     imageEl.alt = product.name;
     imageEl.loading = "lazy";
 
-    nameEl.textContent = product.name;
+    // Search highlighting
+    if (searchQuery.length > 0) {
+      nameEl.innerHTML = highlightText(product.name, searchQuery);
+    } else {
+      nameEl.textContent = product.name;
+    }
+
     priceEl.textContent = product.price;
     badgeEl.textContent = product.readyToOrder ? "Ready to Order" : "Not Ready";
     badgeEl.classList.toggle("is-unavailable", !product.readyToOrder);
@@ -283,9 +438,85 @@ function renderProducts(products, isFiltered) {
       });
     }
 
+    // Click image to open modal
+    mediaEl.addEventListener("click", () => {
+      openModal(product);
+    });
+
     productGridEl.appendChild(card);
   });
 }
+
+/* ================================================================
+   SEARCH HIGHLIGHTING
+   ================================================================ */
+
+function highlightText(text, query) {
+  if (!query) {
+    return escapeHtml(text);
+  }
+
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escapedQuery})`, "gi");
+  const parts = text.split(regex);
+
+  return parts
+    .map((part) => {
+      if (part.toLowerCase() === query.toLowerCase()) {
+        return `<mark>${escapeHtml(part)}</mark>`;
+      }
+      return escapeHtml(part);
+    })
+    .join("");
+}
+
+/* ================================================================
+   PRODUCT MODAL
+   ================================================================ */
+
+function openModal(product) {
+  state.currentModalProduct = product;
+
+  modalImageEl.src = product.imageUrl;
+  modalImageEl.alt = product.name;
+  modalNameEl.textContent = product.name;
+  modalPriceEl.textContent = product.price;
+  modalBadgeEl.textContent = product.readyToOrder ? "Ready to Order" : "Not Ready";
+  modalBadgeEl.classList.toggle("is-unavailable", !product.readyToOrder);
+
+  modalOrderEl.disabled = !product.readyToOrder;
+  modalOrderEl.classList.toggle("is-disabled", !product.readyToOrder);
+  modalOrderEl.textContent = product.readyToOrder ? "Order via Telegram" : "Not Available";
+
+  // Remove previous listener and add new one
+  const newOrderBtn = modalOrderEl.cloneNode(true);
+  modalOrderEl.parentNode.replaceChild(newOrderBtn, modalOrderEl);
+
+  const updatedModalOrderEl = document.getElementById("modal-order");
+
+  if (product.readyToOrder) {
+    updatedModalOrderEl.addEventListener("click", () => {
+      const message = `Hello, I would like to order the ${product.name} for ${product.price}.`;
+      const telegramUrl = buildTelegramOrderUrl(product, message);
+      window.open(telegramUrl, "_blank", "noopener,noreferrer");
+    });
+  }
+
+  modalOverlayEl.classList.add("is-open");
+  modalOverlayEl.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+  modalOverlayEl.classList.remove("is-open");
+  modalOverlayEl.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  state.currentModalProduct = null;
+}
+
+/* ================================================================
+   LOADING & ERROR STATES
+   ================================================================ */
 
 function setLoadingState(isLoading) {
   searchInputEl.disabled = isLoading;
@@ -296,18 +527,51 @@ function setLoadingState(isLoading) {
   statusEl.classList.remove("is-error");
 
   if (isLoading) {
-    statusEl.innerHTML = `
-      <span class="spinner" aria-hidden="true"></span>
-      <span>Loading products...</span>
-    `;
+    statusEl.textContent = "";
+    const spinnerSpan = document.createElement("span");
+    spinnerSpan.className = "spinner";
+    spinnerSpan.setAttribute("aria-hidden", "true");
+    const textSpan = document.createElement("span");
+    textSpan.textContent = "Loading products...";
+    statusEl.appendChild(spinnerSpan);
+    statusEl.appendChild(textSpan);
+
+    showSkeletonCards();
+  }
+}
+
+function showSkeletonCards() {
+  productGridEl.innerHTML = "";
+
+  for (let i = 0; i < 6; i++) {
+    const skeleton = skeletonCardTemplate.content.firstElementChild.cloneNode(true);
+    productGridEl.appendChild(skeleton);
   }
 }
 
 function showError(message) {
   statusEl.classList.remove("is-hidden");
   statusEl.classList.add("is-error");
-  statusEl.innerHTML = `<span>${message}</span>`;
+  statusEl.textContent = "";
+
+  const span = document.createElement("span");
+  span.textContent = message;
+  statusEl.appendChild(span);
+
+  const retryBtn = document.createElement("button");
+  retryBtn.className = "retry-button";
+  retryBtn.type = "button";
+  retryBtn.textContent = "Try Again";
+  retryBtn.addEventListener("click", () => {
+    statusEl.classList.remove("is-error");
+    init();
+  });
+  statusEl.appendChild(retryBtn);
 }
+
+/* ================================================================
+   UTILITIES
+   ================================================================ */
 
 function createFallbackImage(label) {
   const safeLabel = escapeHtml(label);
@@ -326,7 +590,7 @@ function createFallbackImage(label) {
         y="50%"
         dominant-baseline="middle"
         text-anchor="middle"
-        font-family="Alegreya, Georgia, serif"
+        font-family="Ubuntu, sans-serif"
         font-size="42"
         font-weight="700"
         fill="#1f3f8b"

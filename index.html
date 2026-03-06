@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Little Things</title>
-  <meta
-    name="description"
-    content="A professional serverless shopping catalog powered by Airtable and Telegram ordering."
-  >
+  <meta name="description"
+    content="A professional serverless shopping catalog powered by Airtable and Telegram ordering.">
+  <meta property="og:title" content="The Little Things — Shop Catalog">
+  <meta property="og:description" content="Browse our curated collection and order instantly via Telegram.">
+  <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;700;800&display=swap"
-    rel="stylesheet"
-  >
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/the-little-things-logo.svg" as="image" type="image/svg+xml">
   <link rel="icon" type="image/svg+xml" href="assets/the-little-things-logo.svg">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div class="backdrop-shape backdrop-shape-left" aria-hidden="true"></div>
   <div class="backdrop-shape backdrop-shape-right" aria-hidden="true"></div>
@@ -24,38 +25,44 @@
   <div class="page-shell">
     <header class="topbar">
       <a href="#" class="brand" aria-label="The Little Things home">
-        <img
-          class="brand-logo"
-          src="assets/the-little-things-logo.svg"
-          alt="The Little Things logo"
-          loading="eager"
-        >
+        <img class="brand-logo" src="assets/the-little-things-logo.svg" alt="The Little Things logo" loading="eager">
         <span class="brand-text">The Little Things</span>
       </a>
 
       <div class="topbar-actions">
-        <a
-          class="telegram-link"
-          href="#"
-          data-telegram-link
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <svg class="topbar-link-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M21.3 3.2a1 1 0 0 0-1-.14L2.8 10.4a1 1 0 0 0 .07 1.87l4.84 1.65 1.9 6.04a1 1 0 0 0 1.79.23l2.86-3.84 4.38 3.19a1 1 0 0 0 1.57-.62l2.15-14.71a1 1 0 0 0-.43-1.04M6.8 12.01l10.05-5.43-7.8 6.78-.3 2.62-.97-3.08zm11.73 5.03-3.5-2.56a1 1 0 0 0-1.4.2l-1.68 2.26.55-4.82 7.31-6.35z"/>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2" />
+            <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </g>
           </svg>
-          <span>Telegram Support</span>
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <a class="telegram-link" href="#" data-telegram-link target="_blank" rel="noopener noreferrer">
+          <svg class="topbar-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M21.3 3.2a1 1 0 0 0-1-.14L2.8 10.4a1 1 0 0 0 .07 1.87l4.84 1.65 1.9 6.04a1 1 0 0 0 1.79.23l2.86-3.84 4.38 3.19a1 1 0 0 0 1.57-.62l2.15-14.71a1 1 0 0 0-.43-1.04M6.8 12.01l10.05-5.43-7.8 6.78-.3 2.62-.97-3.08zm11.73 5.03-3.5-2.56a1 1 0 0 0-1.4.2l-1.68 2.26.55-4.82 7.31-6.35z" />
+          </svg>
+          <span>Telegram</span>
         </a>
-        <a
-          class="facebook-link"
-          href="https://www.facebook.com/profile.php?id=100075843279191"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a class="facebook-link" href="https://www.facebook.com/profile.php?id=100075843279191" target="_blank"
+          rel="noopener noreferrer">
           <svg class="topbar-link-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M13.5 21v-7.3h2.5l.4-2.9h-2.9V9c0-.84.24-1.42 1.45-1.42H16V5.01c-.56-.07-1.24-.11-2-.11-1.98 0-3.34 1.2-3.34 3.42v1.48H8.4v2.9h2.27V21z"/>
+            <path
+              d="M13.5 21v-7.3h2.5l.4-2.9h-2.9V9c0-.84.24-1.42 1.45-1.42H16V5.01c-.56-.07-1.24-.11-2-.11-1.98 0-3.34 1.2-3.34 3.42v1.48H8.4v2.9h2.27V21z" />
           </svg>
-          <span>Facebook Page</span>
+          <span>Facebook</span>
         </a>
       </div>
     </header>
@@ -73,13 +80,7 @@
             <p class="metric-label">Showing</p>
           </article>
         </div>
-        <a
-          class="inventory-support"
-          href="#"
-          data-telegram-link
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a class="inventory-support" href="#" data-telegram-link target="_blank" rel="noopener noreferrer">
           Support on Telegram
         </a>
       </aside>
@@ -123,6 +124,35 @@
     </main>
   </div>
 
+  <!-- Product Detail Modal -->
+  <div id="product-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-label="Product details">
+    <div class="modal-content">
+      <button id="modal-close" class="modal-close" type="button" aria-label="Close modal">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+      <div class="modal-image-wrap">
+        <img id="modal-image" class="modal-image" alt="">
+      </div>
+      <div class="modal-details">
+        <span id="modal-badge" class="product-badge">Ready to Order</span>
+        <h2 id="modal-name" class="modal-name"></h2>
+        <p id="modal-price" class="modal-price"></p>
+        <button id="modal-order" class="order-button modal-order-btn" type="button">Order via Telegram</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll to top -->
+  <button id="scroll-top" class="scroll-top-btn" type="button" aria-label="Scroll to top">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <polyline points="18 15 12 9 6 15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+        stroke-linejoin="round" />
+    </svg>
+  </button>
+
   <template id="product-card-template">
     <article class="product-card">
       <div class="card-media">
@@ -139,6 +169,21 @@
     </article>
   </template>
 
+  <!-- Skeleton template -->
+  <template id="skeleton-card-template">
+    <article class="product-card skeleton-card" aria-hidden="true">
+      <div class="card-media skeleton-shimmer"></div>
+      <div class="card-content">
+        <div class="card-text">
+          <div class="skeleton-line skeleton-shimmer" style="width:75%;height:22px"></div>
+          <div class="skeleton-line skeleton-shimmer" style="width:40%;height:18px"></div>
+        </div>
+        <div class="skeleton-line skeleton-shimmer" style="width:100%;height:43px;border-radius:11px"></div>
+      </div>
+    </article>
+  </template>
+
   <script src="app.js"></script>
 </body>
+
 </html>

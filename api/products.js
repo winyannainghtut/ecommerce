@@ -6,6 +6,7 @@ const FIELDS = {
   price: "Price",
   photo: "Photo",
   readyToOrder: "Ready to Order",
+  telegramTarget: "Telegram Target",
 };
 
 module.exports = async function handler(req, res) {
@@ -89,6 +90,7 @@ function mapRecordToProduct(record) {
     price: pickText(fields[FIELDS.price], "Price unavailable"),
     imageUrl: pickText(thumbnailLarge, "") || pickText(firstPhoto.url, ""),
     readyToOrder: toBoolean(fields[FIELDS.readyToOrder]),
+    telegramTarget: pickTelegramTarget(fields),
   };
 }
 
@@ -98,6 +100,24 @@ function pickText(value, fallback) {
   }
 
   return fallback;
+}
+
+function pickTelegramTarget(fields) {
+  const candidates = [
+    FIELDS.telegramTarget,
+    "Telegram Channel",
+    "Telegram Link",
+    "Telegram Username",
+  ];
+
+  for (const fieldName of candidates) {
+    const value = pickText(fields[fieldName], "");
+    if (value) {
+      return value;
+    }
+  }
+
+  return "";
 }
 
 function toBoolean(value) {

@@ -28,6 +28,11 @@ Expected field names in that table:
 - `Price`
 - `Photo` (Attachment field; first image is used)
 - `Ready to Order` (Checkbox/Boolean)
+- `Telegram Target` (optional text; per-product Telegram destination)
+
+`Telegram Target` supports:
+- Telegram username (example: `your_store_username` or `@your_store_username`)
+- Full Telegram URL (example: `https://t.me/your_store_username`)
 
 ## Configuration
 
@@ -38,7 +43,7 @@ Set only this:
 
 Example:
 ```js
-const TELEGRAM_USERNAME = "khawgyi";
+const TELEGRAM_USERNAME = "your_store_username";
 ```
 
 ### 2) Serverless env vars (Vercel)
@@ -93,8 +98,9 @@ Important:
 1. Products load in grid.
 2. Search and sort work.
 3. Products with `Ready to Order = false` show `Not Ready` and have disabled order button.
-4. Products with `Ready to Order = true` can open `https://t.me/<username>?text=...`.
-5. `api/products` returns JSON in browser/network tab.
+4. Products with `Ready to Order = true` open product-specific Telegram from `Telegram Target` if provided.
+5. If `Telegram Target` is empty, it falls back to `TELEGRAM_USERNAME` in `app.js`.
+6. `api/products` returns JSON in browser/network tab.
 
 ## Deploy to Vercel
 

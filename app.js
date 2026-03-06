@@ -7,8 +7,8 @@
   Variables. Do NOT put Airtable token/Base ID in this file.
 */
 
-// Paste Telegram username only (without "@"), e.g. "khawgyi".
-const TELEGRAM_USERNAME = "khawgyi";
+// Paste Telegram username only (without "@"), e.g. "your_store_username".
+const TELEGRAM_USERNAME = "your_store_username";
 const PRODUCTS_API_ENDPOINT = "/api/products";
 
 const statusEl = document.getElementById("status");
@@ -66,6 +66,27 @@ function applyTelegramLinks() {
   });
 }
 
+function buildTelegramOrderUrl(product, message) {
+  const target = product.telegramTarget || TELEGRAM_USERNAME;
+  const baseUrl = normalizeTelegramTarget(target);
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}text=${encodeURIComponent(message)}`;
+}
+
+function normalizeTelegramTarget(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) {
+    return `https://t.me/${TELEGRAM_USERNAME.replace(/^@/, "").trim()}`;
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  const username = trimmed.replace(/^@/, "");
+  return `https://t.me/${username}`;
+}
+
 function attachUiEvents() {
   searchInputEl.addEventListener("input", applyFiltersAndRender);
   sortSelectEl.addEventListener("change", applyFiltersAndRender);
@@ -111,6 +132,7 @@ function normalizeProduct(product) {
   const price = safeText(product.price, "Price unavailable");
   const imageUrl = safeText(product.imageUrl, "");
   const readyToOrder = toBoolean(product.readyToOrder);
+  const telegramTarget = safeText(product.telegramTarget, "");
 
   return {
     id: safeText(product.id, `${name}-${price}`),
@@ -118,6 +140,7 @@ function normalizeProduct(product) {
     price,
     imageUrl: imageUrl || createFallbackImage(name),
     readyToOrder,
+    telegramTarget,
   };
 }
 
@@ -254,8 +277,7 @@ function renderProducts(products, isFiltered) {
     if (product.readyToOrder) {
       orderButtonEl.addEventListener("click", () => {
         const message = `Hello, I would like to order the ${product.name} for ${product.price}.`;
-        const cleanUsername = TELEGRAM_USERNAME.replace(/^@/, "").trim();
-        const telegramUrl = `https://t.me/${cleanUsername}?text=${encodeURIComponent(message)}`;
+        const telegramUrl = buildTelegramOrderUrl(product, message);
         window.open(telegramUrl, "_blank", "noopener,noreferrer");
       });
     }

@@ -32,9 +32,6 @@ const modalPriceEl = document.getElementById("modal-price");
 const modalBadgeEl = document.getElementById("modal-badge");
 const modalOrderEl = document.getElementById("modal-order");
 
-// Theme toggle
-const themeToggleEl = document.getElementById("theme-toggle");
-
 // Scroll to top
 const scrollTopEl = document.getElementById("scroll-top");
 
@@ -54,7 +51,6 @@ init();
 
 async function init() {
   attachUiEvents();
-  initTheme();
   initScrollToTop();
 
   try {
@@ -193,34 +189,6 @@ function attachUiEvents() {
     if (e.key === "ArrowLeft") {
       e.preventDefault();
       navigateModalImage(-1);
-    }
-  });
-}
-
-/* ================================================================
-   DARK MODE
-   ================================================================ */
-
-function initTheme() {
-  const savedTheme = localStorage.getItem("theme");
-
-  if (savedTheme) {
-    document.documentElement.setAttribute("data-theme", savedTheme);
-  } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-    document.documentElement.setAttribute("data-theme", "dark");
-  }
-
-  themeToggleEl.addEventListener("click", () => {
-    const currentTheme = document.documentElement.getAttribute("data-theme");
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-
-    document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme);
-  });
-
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
-    if (!localStorage.getItem("theme")) {
-      document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
     }
   });
 }
@@ -764,12 +732,12 @@ function createFallbackImage(label) {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
       <defs>
         <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#d7e3ff" />
-          <stop offset="100%" stop-color="#f4f7ff" />
+          <stop offset="0%" stop-color="#ffdce9" />
+          <stop offset="100%" stop-color="#fff5fa" />
         </linearGradient>
       </defs>
       <rect width="800" height="600" fill="url(#bg)" />
-      <circle cx="660" cy="120" r="110" fill="rgba(15,74,217,0.1)" />
+      <circle cx="660" cy="120" r="110" fill="rgba(217,79,138,0.14)" />
       <text
         x="50%"
         y="50%"
@@ -778,7 +746,7 @@ function createFallbackImage(label) {
         font-family="Ubuntu, sans-serif"
         font-size="42"
         font-weight="700"
-        fill="#1f3f8b"
+        fill="#b23a71"
       >${safeLabel}</text>
     </svg>
   `.trim();

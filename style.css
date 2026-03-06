@@ -320,9 +320,13 @@ select {
 
 .content-layout {
   display: grid;
-  grid-template-columns: 310px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   margin-top: 16px;
+}
+
+.inventory-panel {
+  display: none;
 }
 
 .inventory-panel,
@@ -651,7 +655,7 @@ select {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   margin-top: 14px;
 }

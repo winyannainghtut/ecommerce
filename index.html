@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khaw Gyi Catalog</title>
+  <meta
+    name="description"
+    content="A professional serverless shopping catalog powered by Airtable and Telegram ordering."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="backdrop-shape backdrop-shape-left" aria-hidden="true"></div>
+  <div class="backdrop-shape backdrop-shape-right" aria-hidden="true"></div>
+
+  <div class="page-shell">
+    <header class="topbar">
+      <a href="#" class="brand" aria-label="Khaw Gyi Store home">
+        <span class="brand-mark">KG</span>
+        <span class="brand-text">Khaw Gyi Store</span>
+      </a>
+
+      <a
+        class="telegram-link"
+        href="#"
+        data-telegram-link
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Telegram Support
+      </a>
+    </header>
+
+    <main class="content-layout">
+      <aside class="inventory-panel" aria-label="Catalog highlights">
+        <h2>Live Inventory</h2>
+        <div class="panel-metrics">
+          <article>
+            <p class="metric-value" id="metric-total-products">0</p>
+            <p class="metric-label">Products</p>
+          </article>
+          <article>
+            <p class="metric-value" id="metric-visible-products">0</p>
+            <p class="metric-label">Showing</p>
+          </article>
+        </div>
+        <a
+          class="inventory-support"
+          href="#"
+          data-telegram-link
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Support on Telegram
+        </a>
+      </aside>
+
+      <section id="catalog" class="catalog-section">
+        <div class="catalog-head">
+          <p class="section-label">Collection</p>
+          <h2>Shop Catalog</h2>
+        </div>
+
+        <div class="catalog-controls">
+          <label class="control-group">
+            <span>Search product</span>
+            <input id="search-input" type="search" placeholder="Type product name...">
+          </label>
+
+          <label class="control-group">
+            <span>Sort by</span>
+            <select id="sort-select">
+              <option value="featured">Featured</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+              <option value="price-asc">Price (Low to High)</option>
+              <option value="price-desc">Price (High to Low)</option>
+            </select>
+          </label>
+
+          <button id="clear-filters" class="clear-filters" type="button">Reset</button>
+        </div>
+
+        <div class="catalog-meta">
+          <div id="status" class="status" aria-live="polite">
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Loading products...</span>
+          </div>
+          <p class="result-count" id="result-count">0 products</p>
+        </div>
+
+        <section id="product-grid" class="product-grid" aria-label="Product catalog"></section>
+      </section>
+    </main>
+  </div>
+
+  <template id="product-card-template">
+    <article class="product-card">
+      <div class="card-media">
+        <img class="product-image" alt="">
+        <span class="product-badge">Ready to Order</span>
+      </div>
+      <div class="card-content">
+        <div class="card-text">
+          <h3 class="product-name"></h3>
+          <p class="product-price"></p>
+        </div>
+        <button class="order-button" type="button">Order via Telegram</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

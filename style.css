@@ -145,9 +145,10 @@ select {
 .page-shell {
   position: relative;
   z-index: 1;
-  width: min(1240px, calc(100% - 2rem));
-  margin: 0 auto;
-  padding: 26px 0 42px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 26px 1rem 42px;
 }
 
 /* ================================================================
@@ -1257,8 +1258,8 @@ select {
 
 @media (max-width: 620px) {
   .page-shell {
-    width: calc(100% - 1rem);
-    padding: 14px 0 30px;
+    width: 100%;
+    padding: 14px 0.5rem 30px;
   }
 
   .topbar {

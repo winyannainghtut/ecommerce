@@ -1,71 +1,109 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="logoTitle logoDesc">
   <title id="logoTitle">The Little Things Logo</title>
-  <desc id="logoDesc">Circular monochrome logo with fairy icon and text: the little things, handmade and stationery.</desc>
+  <desc id="logoDesc">Circular monochrome logo with an angel icon and text: the little things, HANDMADE &amp; STATIONERY.</desc>
 
   <defs>
     <style>
-      .outer-bg { fill: #f2f2f2; }
-      .ring { fill: none; stroke: #0f0f0f; }
-      .ink { fill: #0f0f0f; stroke: #0f0f0f; }
-      .line { fill: none; stroke: #0f0f0f; stroke-linecap: round; stroke-linejoin: round; }
+      @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500&amp;family=Montserrat:wght@300&amp;display=swap');
+      
+      .ring-thick { fill: none; stroke: #000; stroke-width: 14; }
+      .ring-thin { fill: none; stroke: #000; stroke-width: 4; }
+      
       .title {
-        font-family: "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive;
-        font-size: 94px;
-        font-weight: 400;
-        letter-spacing: 1px;
-        fill: #0f0f0f;
+        font-family: 'Dancing Script', cursive;
+        font-size: 80px;
+        font-weight: 500;
+        fill: #000;
       }
+      
       .subtitle {
-        font-family: "Padauk", "Century Gothic", "Avenir Next", sans-serif;
-        font-size: 47px;
-        font-weight: 400;
-        letter-spacing: 5px;
-        fill: #4a4a4a;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 26px;
+        font-weight: 300;
+        letter-spacing: 0.28em;
+        fill: #000;
       }
     </style>
   </defs>
 
-  <circle class="outer-bg" cx="400" cy="400" r="382"/>
-  <circle class="ring" cx="400" cy="400" r="380" stroke-width="5"/>
-  <circle class="ring" cx="400" cy="400" r="360" stroke-width="2.6"/>
+  <!-- Background Rings -->
+  <circle cx="400" cy="400" r="390" fill="#fff" />
+  <circle cx="400" cy="400" r="380" class="ring-thick" />
+  <circle cx="400" cy="400" r="358" class="ring-thin" />
 
-  <g transform="translate(400 286)">
-    <path class="line" stroke-width="2.4" d="M-82 48c-20-26-34-58-16-73 10-8 24 10 27 30"/>
-    <path class="line" stroke-width="2.4" d="M82 48c20-26 34-58 16-73-10-8-24 10-27 30"/>
+  <!-- Angel Drawing -->
+  <g transform="translate(400, 275)">
+    <!-- Halo -->
+    <circle cx="0" cy="-35" r="58" fill="none" stroke="#000" stroke-width="2.5" />
+    
+    <!-- Left Wing -->
+    <g id="wing">
+      <path d="M -15,15 
+               C -50,5 -75,10 -80,30 
+               C -75,35 -65,35 -55,35 
+               C -85,45 -95,70 -80,85 
+               C -70,85 -60,82 -50,78 
+               C -65,100 -55,115 -35,100 
+               C -30,90 -20,70 -15,50" 
+            fill="#fff" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <!-- Right Wing -->
+    <use href="#wing" transform="scale(-1, 1)" />
 
-    <path class="line" stroke-width="3.2" d="M-96 53c-28-14-43-33-46-49-2-11 6-15 17-9 10 6 17 17 27 27"/>
-    <path class="line" stroke-width="3.2" d="M96 53c28-14 43-33 46-49 2-11-6-15-17-9-10 6-17 17-27 27"/>
-    <path class="line" stroke-width="3.2" d="M-98 53c-25 10-47 11-58 4-8-6-6-16 4-22 12-7 28-7 42-5"/>
-    <path class="line" stroke-width="3.2" d="M98 53c25 10 47 11 58 4 8-6 6-16-4-22-12-7-28-7-42-5"/>
+    <!-- Dress -->
+    <path d="M -15,38 L -35,102 L -20,112 L 0,102 L 20,112 L 35,102 L 15,38 Z" fill="#fff" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+    
+    <!-- Neckline -->
+    <path d="M -15,38 L 0,48 L 15,38" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Heart Necklace -->
+    <line x1="0" y1="48" x2="0" y2="53" stroke="#000" stroke-width="1.5" />
+    <path d="M 0,55 C -5,51 -8,55 0,61 C 8,55 5,51 0,55 Z" fill="#000" />
 
-    <circle class="line" cx="0" cy="-16" r="49" stroke-width="2.2"/>
-    <circle class="ink" cx="-43" cy="-34" r="20" stroke-width="1.8"/>
-    <circle class="ink" cx="43" cy="-34" r="20" stroke-width="1.8"/>
+    <!-- Buns (behind head) -->
+    <circle cx="-32" cy="-32" r="16" fill="#000" />
+    <circle cx="32" cy="-32" r="16" fill="#000" />
 
-    <path class="ink" stroke-width="2" d="M-54 -21c16-27 43-34 70-25 0 0-9 30-34 46-12 8-28 12-40 8z"/>
-    <path class="ink" stroke-width="2" d="M24 -45c17 6 25 23 17 46-16-7-24-22-24-38 0-3 0-6 1-8z"/>
+    <!-- Head -->
+    <circle cx="0" cy="0" r="38" fill="#fff" stroke="#000" stroke-width="2.5" />
+    
+    <!-- Hair Bangs -->
+    <path d="M -37.5,-5 A 38,38 0 0,1 37.5,-5 Q 20,-20 0,-2 Q -20,-20 -37.5,-5 Z" fill="#000" />
+    <!-- Hair highlight -->
+    <path d="M 5,-12 Q 13,-18 20,-8 Q 15,-13 5,-12 Z" fill="#fff" />
 
-    <path class="line" stroke-width="2.3" d="M-22 10c10 6 22 7 34 0"/>
-    <path class="line" stroke-width="2.1" d="M-18 28c11 5 25 5 36 0"/>
+    <!-- Eyes (closed) -->
+    <path d="M -22,10 Q -15,16 -8,10" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M 8,10 Q 15,16 22,10" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" />
+    
+    <!-- Nose -->
+    <path d="M -1.5,18 Q 0,20 1.5,18" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" />
+    <!-- Mouth -->
+    <path d="M -3.5,25 Q 0,28 3.5,25" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" />
 
-    <path class="line" stroke-width="2.4" d="M-27 33l-13 31"/>
-    <path class="line" stroke-width="2.4" d="M27 33l13 31"/>
-    <path class="line" stroke-width="2.4" d="M-45 66h90"/>
-    <path class="line" stroke-width="2.2" d="M-45 66l0 36 18-8 29-1 28 7 15-8 0-26"/>
-
-    <path class="ink" d="M-6 49c4-6 8-6 12 0l3 18c-6 4-12 4-18 0z"/>
-
-    <path class="line" stroke-width="2.2" d="M40 86l40 0 60 15"/>
-    <path class="line" stroke-width="2.2" d="M46 93l45 16"/>
-    <path class="line" stroke-width="2.2" d="M46 79l45-16"/>
-    <path class="line" stroke-width="2.2" d="M122 96l16-12"/>
-    <path class="line" stroke-width="2.2" d="M122 96l18 2"/>
-    <path class="line" stroke-width="2.2" d="M122 96l8 16"/>
-
-    <path class="ink" d="M-25 -92l7 18 19 1-14 12 5 19-17-10-17 10 5-19-14-12 19-1z"/>
-    <path class="line" stroke-width="2.2" d="M-18 -85c29-8 69 4 86 35"/>
+    <!-- Left Arm -->
+    <path d="M -15,40 Q -25,70 -6,75" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" />
+    <!-- Right Arm -->
+    <path d="M 15,40 Q 25,65 12,71" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" />
+    
+    <!-- Wand Stick (slanting down to the right) -->
+    <line x1="-20" y1="68" x2="35" y2="84" stroke="#000" stroke-width="2.5" stroke-linecap="round" />
+    
+    <!-- Wand Star -->
+    <g transform="translate(35, 84) scale(0.65)">
+      <polygon points="0,-15 5,-5 16,-5 7,2 11,13 0,6 -11,13 -7,2 -16,-5 -5,-5" fill="#fff" stroke="#000" stroke-width="2.5" stroke-linejoin="round" />
+    </g>
+    
+    <!-- Wand Ribbon Trail -->
+    <path d="M 46,79 Q 75,65 110,75 L 100,80 L 115,85 Q 75,95 40,88 Z" fill="#fff" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+    
+    <!-- Top Floating Star -->
+    <g transform="translate(0, -98) scale(0.6)">
+      <polygon points="0,-15 5,-5 16,-5 7,2 11,13 0,6 -11,13 -7,2 -16,-5 -5,-5" fill="#000" />
+    </g>
   </g>
 
-  <text class="title" x="400" y="505" text-anchor="middle">the little things</text>
-  <text class="subtitle" x="400" y="575" text-anchor="middle">HANDMADE &amp; STATIONERY</text>
+  <!-- Text Section -->
+  <text class="title" x="400" y="540" text-anchor="middle">the little things</text>
+  <text class="subtitle" x="407" y="610" text-anchor="middle">HANDMADE &amp; STATIONERY</text>
 </svg>

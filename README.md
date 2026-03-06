@@ -1,119 +1,115 @@
-# Khaw Gyi Catalog (Vercel + Airtable + Telegram)
+# The Little Things — Catalog (Vercel + Airtable + Telegram)
 
-Serverless catalog website built with:
-- `index.html`
-- `style.css`
-- `app.js`
-- Vercel serverless function at `api/products.js`
+A serverless shopping catalog that pulls products from Airtable and lets customers order via Telegram.
 
-## Why this setup
+## Features
 
-Airtable API credentials are kept server-side in Vercel Environment Variables.
-The browser only calls `/api/products`, so your Airtable token is not exposed publicly.
+- **Dark Mode** — toggle in topbar, persists in `localStorage`, auto-detects system preference
+- **Product Modal** — click any product image for an enlarged lightbox view
+- **Skeleton Loading** — shimmer placeholders while products load
+- **Scroll to Top** — fixed button appears after scrolling down
+- **Search Highlighting** — matching text highlighted in product names
+- **Retry on Error** — "Try Again" button on error states
+- **Responsive Design** — adapts to desktop, tablet, and mobile
 
 ## Project Structure
 
-- `index.html` - page markup
-- `style.css` - UI styling
-- `app.js` - frontend logic (fetch products, render cards, Telegram order action)
-- `api/products.js` - serverless proxy to Airtable API
+| File | Role |
+|---|---|
+| `index.html` | Page markup with product card & skeleton templates |
+| `style.css` | Styling with CSS variables, dark mode, responsive breakpoints |
+| `app.js` | Frontend logic — fetch, filter, sort, render, modal, theme |
+| `api/products.js` | Serverless Airtable proxy (returns product JSON) |
+| `api/config.js` | Serverless config endpoint (returns Telegram username) |
+| `.env.local` | Local environment variables (git-ignored) |
 
-## Airtable Requirements
+## Airtable Setup
 
-Table name:
-- `Products` (or set custom via env var)
+**Table name:** `Products` (or set custom via `AIRTABLE_TABLE_NAME`)
 
-Expected field names in that table:
-- `Name`
-- `Price`
-- `Photo` (Attachment field; first image is used)
-- `Ready to Order` (Checkbox/Boolean)
-- `Telegram Target` (optional text; per-product Telegram destination)
+**Required fields:**
 
-`Telegram Target` supports:
-- Telegram username (example: `your_store_username` or `@your_store_username`)
-- Full Telegram URL (example: `https://t.me/your_store_username`)
+| Field | Type | Description |
+|---|---|---|
+| `Name` | Text | Product name |
+| `Price` | Text | Display price (e.g. `100MMK`) |
+| `Photo` | Attachment | First image is used |
+| `Description` | Long text (optional) | Shown in product detail modal |
+| `Ready to Order` | Checkbox | Enables the order button |
+| `Telegram Target` | Text (optional) | Per-product Telegram destination |
+
+`Telegram Target` accepts:
+- Username: `your_store_username` or `@your_store_username`
+- Full URL: `https://t.me/your_store_username`
 
 ## Configuration
 
-### 1) Frontend config (`app.js`)
+### Environment Variables
 
-Set only this:
-- `TELEGRAM_USERNAME` (without `@`)
-
-Example:
-```js
-const TELEGRAM_USERNAME = "your_store_username";
-```
-
-### 2) Serverless env vars (Vercel)
-
-Set these in Vercel Project Settings -> Environment Variables:
-
-- `AIRTABLE_TOKEN` = your Airtable read-only PAT
-- `AIRTABLE_BASE_ID` = your base id (example: `app...`)
-- `AIRTABLE_TABLE_NAME` = `Products` (optional, defaults to `Products`)
-
-## Local Testing
-
-Use Vercel local runtime so `/api/products` works locally.
-
-### 1) Install Vercel CLI (if not installed)
-
-```bash
-npm i -g vercel
-```
-
-or use:
-
-```bash
-npx vercel --version
-```
-
-### 2) Create local env file
-
-Create `.env.local` in project root:
+Set these in **Vercel Project Settings → Environment Variables** and in `.env.local` for local dev:
 
 ```env
 AIRTABLE_TOKEN=your_read_only_airtable_token
 AIRTABLE_BASE_ID=your_airtable_base_id
 AIRTABLE_TABLE_NAME=Products
+TELEGRAM_USERNAME=your_telegram_username
 ```
 
-### 3) Run local dev server
+| Variable | Required | Description |
+|---|---|---|
+| `AIRTABLE_TOKEN` | ✅ | Airtable read-only Personal Access Token |
+| `AIRTABLE_BASE_ID` | ✅ | Airtable base ID (e.g. `appXXXXXX`) |
+| `AIRTABLE_TABLE_NAME` | ❌ | Defaults to `Products` |
+| `TELEGRAM_USERNAME` | ✅ | Default Telegram username for ordering |
+
+> **Note:** No secrets are exposed in frontend code. The Airtable token stays server-side, and the Telegram username is served via `/api/config`.
+
+## Local Development
+
+### 1. Install Vercel CLI
+
+```bash
+npm i -g vercel
+```
+
+### 2. Create `.env.local`
+
+```env
+AIRTABLE_TOKEN=your_read_only_airtable_token
+AIRTABLE_BASE_ID=your_airtable_base_id
+AIRTABLE_TABLE_NAME=Products
+TELEGRAM_USERNAME=your_telegram_username
+```
+
+### 3. Run dev server
 
 ```bash
 npx vercel dev
 ```
 
-Open:
-- `http://localhost:3000`
+Open: `http://localhost:3000`
 
-Important:
-- Do not use `python -m http.server` for this project anymore.
-- This app needs the Vercel function route `/api/products`, which only works via `npx vercel dev` (local) or Vercel deployment.
+> **Important:** Do not use a static file server. This app requires `/api/products` and `/api/config`, which only work via `npx vercel dev` or Vercel deployment.
 
-### 4) Functional checks
+### 4. Verify
 
-1. Products load in grid.
-2. Search and sort work.
-3. Products with `Ready to Order = false` show `Not Ready` and have disabled order button.
-4. Products with `Ready to Order = true` open product-specific Telegram from `Telegram Target` if provided.
-5. If `Telegram Target` is empty, it falls back to `TELEGRAM_USERNAME` in `app.js`.
-6. `api/products` returns JSON in browser/network tab.
+1. Products load in the grid with skeleton placeholders during fetch
+2. Search filters products and highlights matching text
+3. Sort by name/price works
+4. Dark mode toggle persists across page reloads
+5. Clicking a product image opens the detail modal
+6. "Ready to Order" products open Telegram on order button click
+7. Products with `Telegram Target` use that destination; otherwise fallback to `TELEGRAM_USERNAME`
 
 ## Deploy to Vercel
 
-1. Push project to GitHub (or use Vercel import).
-2. Import project in Vercel.
-3. Add environment variables:
-   - `AIRTABLE_TOKEN`
-   - `AIRTABLE_BASE_ID`
-   - `AIRTABLE_TABLE_NAME` (optional)
-4. Deploy.
+1. Push project to GitHub
+2. Import project in Vercel
+3. Add environment variables: `AIRTABLE_TOKEN`, `AIRTABLE_BASE_ID`, `TELEGRAM_USERNAME` (and optionally `AIRTABLE_TABLE_NAME`)
+4. Deploy
 
-After deploy, your frontend calls `/api/products` on the same domain.
+## Security
 
-## Security Note
-
-If an Airtable token was ever committed/shared in frontend code, rotate it and create a new read-only token with minimal scopes.
+- Airtable token is server-side only — never exposed to the browser
+- Telegram username is served via a server endpoint, not hardcoded in JS
+- If a token was ever committed to Git history, rotate it immediately

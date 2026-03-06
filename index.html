@@ -91,6 +91,8 @@
           <h2>Shop Catalog</h2>
         </div>
 
+        <nav id="category-menu" class="category-menu" aria-label="Product categories"></nav>
+
         <div class="catalog-controls">
           <label class="control-group">
             <span>Search product</span>
@@ -140,6 +142,7 @@
         <span id="modal-badge" class="product-badge">Ready to Order</span>
         <h2 id="modal-name" class="modal-name"></h2>
         <p id="modal-price" class="modal-price"></p>
+        <p id="modal-description" class="modal-description"></p>
         <button id="modal-order" class="order-button modal-order-btn" type="button">Order via Telegram</button>
       </div>
     </div>
@@ -164,7 +167,10 @@
           <h3 class="product-name"></h3>
           <p class="product-price"></p>
         </div>
-        <button class="order-button" type="button">Order via Telegram</button>
+        <div class="card-actions">
+          <button class="details-button" type="button">Details</button>
+          <button class="order-button" type="button">Order via Telegram</button>
+        </div>
       </div>
     </article>
   </template>

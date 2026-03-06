@@ -39,6 +39,7 @@ const state = {
   products: [],
   telegramUsername: "",
   currentModalProduct: null,
+  currentCategory: "All",
 };
 
 init();
@@ -64,9 +65,8 @@ async function init() {
       return;
     }
 
-    applyTelegramLinks();
-
     state.products = await fetchAllProducts();
+    renderCategoryMenu();
     applyFiltersAndRender();
     setLoadingState(false);
   } catch (error) {
@@ -146,6 +146,15 @@ function attachUiEvents() {
   clearFiltersEl.addEventListener("click", () => {
     searchInputEl.value = "";
     sortSelectEl.value = "featured";
+    state.currentCategory = "All";
+
+    const categoryMenuEl = document.getElementById("category-menu");
+    if (categoryMenuEl) {
+      Array.from(categoryMenuEl.children).forEach(b => {
+        b.classList.toggle("active", b.textContent === "All");
+      });
+    }
+
     applyFiltersAndRender();
   });
 
@@ -243,6 +252,8 @@ async function fetchAllProducts() {
 function normalizeProduct(product) {
   const name = safeText(product.name, "Untitled product");
   const price = safeText(product.price, "Price unavailable");
+  const rawDescription = safeText(product.description, "");
+  const description = cleanDescription(rawDescription);
   const imageUrl = safeText(product.imageUrl, "");
   const readyToOrder = toBoolean(product.readyToOrder);
   const telegramTarget = safeText(product.telegramTarget, "");
@@ -251,6 +262,7 @@ function normalizeProduct(product) {
     id: safeText(product.id, `${name}-${price}`),
     name,
     price,
+    description,
     imageUrl: imageUrl || createFallbackImage(name),
     readyToOrder,
     telegramTarget,
@@ -263,6 +275,16 @@ function safeText(value, fallback) {
   }
 
   return fallback;
+}
+
+function cleanDescription(text) {
+  if (!text) return "";
+
+  // Convert Markdown links [Text](URL) into just "Text" to keep UI clean
+  const strippedLinks = text.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+
+  // Remove multiple consecutive empty lines
+  return strippedLinks.replace(/\n\s*\n/g, "\n\n").trim();
 }
 
 function toBoolean(value) {
@@ -291,7 +313,9 @@ function applyFiltersAndRender() {
   const sortValue = sortSelectEl.value;
 
   let visibleProducts = state.products.filter((product) => {
-    return product.name.toLowerCase().includes(searchValue);
+    const matchesCategory = state.currentCategory === "All" || product.category === state.currentCategory;
+    const matchesSearch = product.name.toLowerCase().includes(searchValue);
+    return matchesCategory && matchesSearch;
   });
 
   visibleProducts = sortProducts(visibleProducts, sortValue);
@@ -388,6 +412,43 @@ function animateCounter(element, target) {
    RENDERING
    ================================================================ */
 
+function renderCategoryMenu() {
+  const categoryMenuEl = document.getElementById("category-menu");
+  if (!categoryMenuEl) return;
+
+  categoryMenuEl.innerHTML = "";
+
+  // Extract unique categories
+  const categories = ["All"];
+  state.products.forEach((product) => {
+    if (product.category && product.category !== "Uncategorized" && !categories.includes(product.category)) {
+      categories.push(product.category);
+    }
+  });
+
+  // Render buttons
+  categories.forEach((category) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "category-btn";
+    btn.textContent = category;
+    if (category === state.currentCategory) {
+      btn.classList.add("active");
+    }
+
+    btn.addEventListener("click", () => {
+      // Update state and UI
+      state.currentCategory = category;
+      Array.from(categoryMenuEl.children).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      applyFiltersAndRender();
+    });
+
+    categoryMenuEl.appendChild(btn);
+  });
+}
+
 function renderProducts(products, searchQuery) {
   productGridEl.innerHTML = "";
 
@@ -408,6 +469,7 @@ function renderProducts(products, searchQuery) {
     const nameEl = card.querySelector(".product-name");
     const priceEl = card.querySelector(".product-price");
     const orderButtonEl = card.querySelector(".order-button");
+    const detailsButtonEl = card.querySelector(".details-button");
     const mediaEl = card.querySelector(".card-media");
 
     imageEl.src = product.imageUrl;
@@ -438,8 +500,11 @@ function renderProducts(products, searchQuery) {
       });
     }
 
-    // Click image to open modal
+    // Click image or Details button to open modal
     mediaEl.addEventListener("click", () => {
+      openModal(product);
+    });
+    detailsButtonEl.addEventListener("click", () => {
       openModal(product);
     });
 
@@ -484,23 +549,26 @@ function openModal(product) {
   modalBadgeEl.textContent = product.readyToOrder ? "Ready to Order" : "Not Ready";
   modalBadgeEl.classList.toggle("is-unavailable", !product.readyToOrder);
 
-  modalOrderEl.disabled = !product.readyToOrder;
-  modalOrderEl.classList.toggle("is-disabled", !product.readyToOrder);
-  modalOrderEl.textContent = product.readyToOrder ? "Order via Telegram" : "Not Available";
+  // Show description
+  const modalDescEl = document.getElementById("modal-description");
+  modalDescEl.textContent = product.description || "";
 
-  // Remove previous listener and add new one
-  const newOrderBtn = modalOrderEl.cloneNode(true);
-  modalOrderEl.parentNode.replaceChild(newOrderBtn, modalOrderEl);
-
-  const updatedModalOrderEl = document.getElementById("modal-order");
+  // Always get the current button from the DOM (it may have been replaced)
+  const currentOrderBtn = document.getElementById("modal-order");
+  const newOrderBtn = currentOrderBtn.cloneNode(true);
+  newOrderBtn.disabled = !product.readyToOrder;
+  newOrderBtn.classList.toggle("is-disabled", !product.readyToOrder);
+  newOrderBtn.textContent = product.readyToOrder ? "Order via Telegram" : "Not Available";
 
   if (product.readyToOrder) {
-    updatedModalOrderEl.addEventListener("click", () => {
+    newOrderBtn.addEventListener("click", () => {
       const message = `Hello, I would like to order the ${product.name} for ${product.price}.`;
       const telegramUrl = buildTelegramOrderUrl(product, message);
       window.open(telegramUrl, "_blank", "noopener,noreferrer");
     });
   }
+
+  currentOrderBtn.parentNode.replaceChild(newOrderBtn, currentOrderBtn);
 
   modalOverlayEl.classList.add("is-open");
   modalOverlayEl.setAttribute("aria-hidden", "false");

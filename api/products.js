@@ -5,6 +5,8 @@ const FIELDS = {
   name: "Name",
   price: "Price",
   photo: "Photo",
+  description: "Description",
+  category: "Category",
   readyToOrder: "Ready to Order",
   telegramTarget: "Telegram Target",
 };
@@ -79,9 +81,9 @@ function mapRecordToProduct(record) {
   const firstPhoto = photoList[0] || {};
   const thumbnailLarge =
     firstPhoto &&
-    firstPhoto.thumbnails &&
-    firstPhoto.thumbnails.large &&
-    firstPhoto.thumbnails.large.url
+      firstPhoto.thumbnails &&
+      firstPhoto.thumbnails.large &&
+      firstPhoto.thumbnails.large.url
       ? firstPhoto.thumbnails.large.url
       : "";
 
@@ -89,6 +91,8 @@ function mapRecordToProduct(record) {
     id: record.id || "",
     name: pickText(fields[FIELDS.name], "Untitled product"),
     price: pickText(fields[FIELDS.price], "Price unavailable"),
+    description: pickText(fields[FIELDS.description], ""),
+    category: pickText(fields[FIELDS.category], "Uncategorized"),
     imageUrl: pickText(thumbnailLarge, "") || pickText(firstPhoto.url, ""),
     readyToOrder: toBoolean(fields[FIELDS.readyToOrder]),
     telegramTarget: pickTelegramTarget(fields),

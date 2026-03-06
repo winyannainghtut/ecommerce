@@ -35,7 +35,7 @@ A serverless shopping catalog that pulls products from Airtable and lets custome
 |---|---|---|
 | `Name` | Text | Product name |
 | `Price` | Text | Display price (e.g. `100MMK`) |
-| `Photo` | Attachment | First image is used |
+| `Photo` | Attachment | Multiple images are supported (shown in modal gallery) |
 | `Category` | Single select / Text | Category label (e.g. `Character keychains`, `Stationery`) |
 | `Description` | Long text | Shown in product detail modal |
 | `Ready to Order` | Checkbox | Enables the order button |

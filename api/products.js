@@ -78,14 +78,10 @@ async function fetchProductsFromAirtable({ token, baseId, tableName }) {
 function mapRecordToProduct(record) {
   const fields = record.fields || {};
   const photoList = Array.isArray(fields[FIELDS.photo]) ? fields[FIELDS.photo] : [];
-  const firstPhoto = photoList[0] || {};
-  const thumbnailLarge =
-    firstPhoto &&
-      firstPhoto.thumbnails &&
-      firstPhoto.thumbnails.large &&
-      firstPhoto.thumbnails.large.url
-      ? firstPhoto.thumbnails.large.url
-      : "";
+  const imageUrls = photoList
+    .map((photo) => pickAttachmentUrl(photo))
+    .filter(Boolean);
+  const firstImage = imageUrls[0] || "";
 
   return {
     id: record.id || "",
@@ -93,10 +89,30 @@ function mapRecordToProduct(record) {
     price: pickText(fields[FIELDS.price], "Price unavailable"),
     description: pickText(fields[FIELDS.description], ""),
     category: pickText(fields[FIELDS.category], "Uncategorized"),
-    imageUrl: pickText(thumbnailLarge, "") || pickText(firstPhoto.url, ""),
+    imageUrl: firstImage,
+    imageUrls,
     readyToOrder: toBoolean(fields[FIELDS.readyToOrder]),
     telegramTarget: pickTelegramTarget(fields),
   };
+}
+
+function pickAttachmentUrl(photo) {
+  if (!photo || typeof photo !== "object") {
+    return "";
+  }
+
+  const large =
+    photo.thumbnails &&
+      photo.thumbnails.large &&
+      typeof photo.thumbnails.large.url === "string"
+      ? photo.thumbnails.large.url
+      : "";
+
+  if (large) {
+    return large.trim();
+  }
+
+  return typeof photo.url === "string" ? photo.url.trim() : "";
 }
 
 function pickText(value, fallback) {

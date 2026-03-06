@@ -24,6 +24,7 @@ const visibleMetricEl = document.getElementById("metric-visible-products");
 const modalOverlayEl = document.getElementById("product-modal");
 const modalCloseEl = document.getElementById("modal-close");
 const modalImageEl = document.getElementById("modal-image");
+const modalThumbnailsEl = document.getElementById("modal-thumbnails");
 const modalNameEl = document.getElementById("modal-name");
 const modalPriceEl = document.getElementById("modal-price");
 const modalBadgeEl = document.getElementById("modal-badge");
@@ -39,6 +40,7 @@ const state = {
   products: [],
   telegramUsername: "",
   currentModalProduct: null,
+  currentModalImageIndex: 0,
   currentCategory: "All",
 };
 
@@ -169,8 +171,24 @@ function attachUiEvents() {
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modalOverlayEl.classList.contains("is-open")) {
+    if (!modalOverlayEl.classList.contains("is-open")) {
+      return;
+    }
+
+    if (e.key === "Escape") {
       closeModal();
+      return;
+    }
+
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      navigateModalImage(1);
+      return;
+    }
+
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      navigateModalImage(-1);
     }
   });
 }
@@ -258,6 +276,7 @@ function normalizeProduct(product) {
   const rawDescription = safeText(product.description, "");
   const description = cleanDescription(rawDescription);
   const imageUrl = safeText(product.imageUrl, "");
+  const imageUrls = normalizeImageUrls(product.imageUrls, imageUrl, name);
   const readyToOrder = toBoolean(product.readyToOrder);
   const telegramTarget = safeText(product.telegramTarget, "");
 
@@ -267,7 +286,8 @@ function normalizeProduct(product) {
     price,
     description,
     category: safeText(product.category, "Uncategorized"),
-    imageUrl: imageUrl || createFallbackImage(name),
+    imageUrl: imageUrls[0],
+    imageUrls,
     readyToOrder,
     telegramTarget,
   };
@@ -289,6 +309,31 @@ function cleanDescription(text) {
 
   // Remove multiple consecutive empty lines
   return strippedLinks.replace(/\n\s*\n/g, "\n\n").trim();
+}
+
+function normalizeImageUrls(rawImageUrls, singleImageUrl, label) {
+  const imageSet = new Set();
+
+  if (Array.isArray(rawImageUrls)) {
+    rawImageUrls.forEach((url) => {
+      const clean = safeText(url, "");
+      if (clean) {
+        imageSet.add(clean);
+      }
+    });
+  }
+
+  const single = safeText(singleImageUrl, "");
+  if (single) {
+    imageSet.add(single);
+  }
+
+  const urls = Array.from(imageSet);
+  if (!urls.length) {
+    urls.push(createFallbackImage(label));
+  }
+
+  return urls;
 }
 
 function formatPrice(value) {
@@ -486,7 +531,7 @@ function renderProducts(products, searchQuery) {
     const detailsButtonEl = card.querySelector(".details-button");
     const mediaEl = card.querySelector(".card-media");
 
-    imageEl.src = product.imageUrl;
+    imageEl.src = product.imageUrls[0] || product.imageUrl;
     imageEl.alt = product.name;
     imageEl.loading = "lazy";
 
@@ -498,13 +543,13 @@ function renderProducts(products, searchQuery) {
     }
 
     priceEl.textContent = product.price;
-    badgeEl.textContent = product.readyToOrder ? "Ready to Order" : "Not Ready";
+    badgeEl.textContent = product.readyToOrder ? "In-Stock" : "Out-Of-Stock";
     badgeEl.classList.toggle("is-unavailable", !product.readyToOrder);
 
     card.style.animationDelay = `${Math.min(index * 40, 320)}ms`;
     orderButtonEl.disabled = !product.readyToOrder;
     orderButtonEl.classList.toggle("is-disabled", !product.readyToOrder);
-    orderButtonEl.textContent = product.readyToOrder ? "Order via Telegram" : "Not Available";
+    orderButtonEl.textContent = product.readyToOrder ? "ပစ္စည်းမှာရန်" : "ပစ္စည်းကုန်နေသည်";
 
     if (product.readyToOrder) {
       orderButtonEl.addEventListener("click", () => {
@@ -555,12 +600,13 @@ function highlightText(text, query) {
 
 function openModal(product) {
   state.currentModalProduct = product;
+  state.currentModalImageIndex = 0;
 
-  modalImageEl.src = product.imageUrl;
-  modalImageEl.alt = product.name;
+  setModalImage(product, 0);
+  renderModalThumbnails(product);
   modalNameEl.textContent = product.name;
   modalPriceEl.textContent = product.price;
-  modalBadgeEl.textContent = product.readyToOrder ? "Ready to Order" : "Not Ready";
+  modalBadgeEl.textContent = product.readyToOrder ? "In-Stock" : "Out-Of-Stock";
   modalBadgeEl.classList.toggle("is-unavailable", !product.readyToOrder);
 
   // Show description
@@ -572,7 +618,7 @@ function openModal(product) {
   const newOrderBtn = currentOrderBtn.cloneNode(true);
   newOrderBtn.disabled = !product.readyToOrder;
   newOrderBtn.classList.toggle("is-disabled", !product.readyToOrder);
-  newOrderBtn.textContent = product.readyToOrder ? "Order via Telegram" : "Not Available";
+  newOrderBtn.textContent = product.readyToOrder ? "ပစ္စည်းမှာရန်" : "ပစ္စည်းကုန်နေသည်";
 
   if (product.readyToOrder) {
     newOrderBtn.addEventListener("click", () => {
@@ -594,6 +640,88 @@ function closeModal() {
   modalOverlayEl.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
   state.currentModalProduct = null;
+  state.currentModalImageIndex = 0;
+  if (modalThumbnailsEl) {
+    modalThumbnailsEl.innerHTML = "";
+    modalThumbnailsEl.hidden = true;
+  }
+}
+
+function renderModalThumbnails(product) {
+  if (!modalThumbnailsEl) {
+    return;
+  }
+
+  const images = Array.isArray(product.imageUrls) && product.imageUrls.length
+    ? product.imageUrls
+    : [product.imageUrl];
+
+  modalThumbnailsEl.innerHTML = "";
+
+  if (images.length <= 1) {
+    modalThumbnailsEl.hidden = true;
+    return;
+  }
+
+  modalThumbnailsEl.hidden = false;
+
+  images.forEach((url, index) => {
+    const thumbBtn = document.createElement("button");
+    thumbBtn.type = "button";
+    thumbBtn.className = "modal-thumb";
+    if (index === state.currentModalImageIndex) {
+      thumbBtn.classList.add("is-active");
+    }
+
+    const thumbImg = document.createElement("img");
+    thumbImg.src = url;
+    thumbImg.alt = `${product.name} thumbnail ${index + 1}`;
+    thumbImg.loading = "lazy";
+
+    thumbBtn.appendChild(thumbImg);
+    thumbBtn.addEventListener("click", () => {
+      setModalImage(product, index);
+    });
+
+    modalThumbnailsEl.appendChild(thumbBtn);
+  });
+}
+
+function setModalImage(product, imageIndex) {
+  const images = Array.isArray(product.imageUrls) && product.imageUrls.length
+    ? product.imageUrls
+    : [product.imageUrl];
+
+  const clampedIndex = Math.max(0, Math.min(imageIndex, images.length - 1));
+  state.currentModalImageIndex = clampedIndex;
+  modalImageEl.src = images[clampedIndex];
+  modalImageEl.alt = `${product.name} photo ${clampedIndex + 1}`;
+
+  if (modalThumbnailsEl) {
+    Array.from(modalThumbnailsEl.children).forEach((thumb, index) => {
+      thumb.classList.toggle("is-active", index === clampedIndex);
+    });
+  }
+}
+
+function navigateModalImage(direction) {
+  const product = state.currentModalProduct;
+  if (!product) {
+    return;
+  }
+
+  const images = Array.isArray(product.imageUrls) && product.imageUrls.length
+    ? product.imageUrls
+    : [product.imageUrl];
+
+  if (images.length <= 1) {
+    return;
+  }
+
+  const nextIndex =
+    (state.currentModalImageIndex + direction + images.length) % images.length;
+
+  setModalImage(product, nextIndex);
 }
 
 /* ================================================================

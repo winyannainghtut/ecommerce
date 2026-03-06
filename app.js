@@ -24,7 +24,9 @@ const visibleMetricEl = document.getElementById("metric-visible-products");
 const modalOverlayEl = document.getElementById("product-modal");
 const modalCloseEl = document.getElementById("modal-close");
 const modalImageEl = document.getElementById("modal-image");
-const modalThumbnailsEl = document.getElementById("modal-thumbnails");
+const modalPrevEl = document.getElementById("modal-prev");
+const modalNextEl = document.getElementById("modal-next");
+const modalImageCounterEl = document.getElementById("modal-image-counter");
 const modalNameEl = document.getElementById("modal-name");
 const modalPriceEl = document.getElementById("modal-price");
 const modalBadgeEl = document.getElementById("modal-badge");
@@ -164,6 +166,8 @@ function attachUiEvents() {
 
   // Modal events
   modalCloseEl.addEventListener("click", closeModal);
+  modalPrevEl.addEventListener("click", () => navigateModalImage(-1));
+  modalNextEl.addEventListener("click", () => navigateModalImage(1));
   modalOverlayEl.addEventListener("click", (e) => {
     if (e.target === modalOverlayEl) {
       closeModal();
@@ -603,7 +607,6 @@ function openModal(product) {
   state.currentModalImageIndex = 0;
 
   setModalImage(product, 0);
-  renderModalThumbnails(product);
   modalNameEl.textContent = product.name;
   modalPriceEl.textContent = product.price;
   modalBadgeEl.textContent = product.readyToOrder ? "In-Stock" : "Out-Of-Stock";
@@ -641,50 +644,10 @@ function closeModal() {
   document.body.style.overflow = "";
   state.currentModalProduct = null;
   state.currentModalImageIndex = 0;
-  if (modalThumbnailsEl) {
-    modalThumbnailsEl.innerHTML = "";
-    modalThumbnailsEl.hidden = true;
+  if (modalImageCounterEl) {
+    modalImageCounterEl.textContent = "";
   }
-}
-
-function renderModalThumbnails(product) {
-  if (!modalThumbnailsEl) {
-    return;
-  }
-
-  const images = Array.isArray(product.imageUrls) && product.imageUrls.length
-    ? product.imageUrls
-    : [product.imageUrl];
-
-  modalThumbnailsEl.innerHTML = "";
-
-  if (images.length <= 1) {
-    modalThumbnailsEl.hidden = true;
-    return;
-  }
-
-  modalThumbnailsEl.hidden = false;
-
-  images.forEach((url, index) => {
-    const thumbBtn = document.createElement("button");
-    thumbBtn.type = "button";
-    thumbBtn.className = "modal-thumb";
-    if (index === state.currentModalImageIndex) {
-      thumbBtn.classList.add("is-active");
-    }
-
-    const thumbImg = document.createElement("img");
-    thumbImg.src = url;
-    thumbImg.alt = `${product.name} thumbnail ${index + 1}`;
-    thumbImg.loading = "lazy";
-
-    thumbBtn.appendChild(thumbImg);
-    thumbBtn.addEventListener("click", () => {
-      setModalImage(product, index);
-    });
-
-    modalThumbnailsEl.appendChild(thumbBtn);
-  });
+  updateModalNavigation(0);
 }
 
 function setModalImage(product, imageIndex) {
@@ -697,11 +660,11 @@ function setModalImage(product, imageIndex) {
   modalImageEl.src = images[clampedIndex];
   modalImageEl.alt = `${product.name} photo ${clampedIndex + 1}`;
 
-  if (modalThumbnailsEl) {
-    Array.from(modalThumbnailsEl.children).forEach((thumb, index) => {
-      thumb.classList.toggle("is-active", index === clampedIndex);
-    });
+  if (modalImageCounterEl) {
+    modalImageCounterEl.textContent = `${clampedIndex + 1} / ${images.length}`;
   }
+
+  updateModalNavigation(images.length);
 }
 
 function navigateModalImage(direction) {
@@ -722,6 +685,18 @@ function navigateModalImage(direction) {
     (state.currentModalImageIndex + direction + images.length) % images.length;
 
   setModalImage(product, nextIndex);
+}
+
+function updateModalNavigation(totalImages) {
+  const hasMultipleImages = totalImages > 1;
+
+  if (modalPrevEl) {
+    modalPrevEl.disabled = !hasMultipleImages;
+  }
+
+  if (modalNextEl) {
+    modalNextEl.disabled = !hasMultipleImages;
+  }
 }
 
 /* ================================================================

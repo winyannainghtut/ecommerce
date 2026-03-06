@@ -140,8 +140,20 @@
         </svg>
       </button>
       <div class="modal-image-wrap">
+        <button id="modal-prev" class="modal-nav-btn modal-nav-btn-prev" type="button" aria-label="Previous photo">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
         <img id="modal-image" class="modal-image" alt="">
-        <div id="modal-thumbnails" class="modal-thumbnails" aria-label="Product image thumbnails"></div>
+        <button id="modal-next" class="modal-nav-btn modal-nav-btn-next" type="button" aria-label="Next photo">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <p id="modal-image-counter" class="modal-image-counter" aria-live="polite"></p>
       </div>
       <div class="modal-details">
         <span id="modal-badge" class="product-badge">In-Stock</span>

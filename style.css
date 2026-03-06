@@ -101,6 +101,82 @@ select {
 }
 
 /* ================================================================
+   FLOATING RIBBONS
+   ================================================================ */
+
+.ribbon-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ribbon {
+  position: absolute;
+  /* Light mode translucent ribbon */
+  background: linear-gradient(90deg, transparent, rgba(12, 71, 212, 0.3), rgba(217, 79, 138, 0.4), transparent);
+  height: 15vh;
+  width: 200vw;
+  transform-origin: center;
+  filter: blur(24px);
+}
+
+[data-theme="dark"] .ribbon {
+  /* Dark mode translucent ribbon */
+  background: linear-gradient(90deg, transparent, rgba(91, 141, 239, 0.25), rgba(255, 174, 211, 0.35), transparent);
+}
+
+.ribbon-1 {
+  top: 15%;
+  animation: floatRibbon1 28s infinite alternate ease-in-out;
+}
+
+.ribbon-2 {
+  top: 55%;
+  animation: floatRibbon2 35s infinite alternate ease-in-out;
+}
+
+.ribbon-3 {
+  top: 80%;
+  height: 25vh;
+  animation: floatRibbon3 40s infinite alternate ease-in-out;
+}
+
+@keyframes floatRibbon1 {
+  0% {
+    transform: translateX(-10vw) rotate(-15deg) translateY(0);
+  }
+
+  100% {
+    transform: translateX(10vw) rotate(-12deg) translateY(30px);
+  }
+}
+
+@keyframes floatRibbon2 {
+  0% {
+    transform: translateX(5vw) rotate(12deg) translateY(0);
+  }
+
+  100% {
+    transform: translateX(-15vw) rotate(15deg) translateY(-40px);
+  }
+}
+
+@keyframes floatRibbon3 {
+  0% {
+    transform: translateX(-15vw) rotate(-8deg) translateY(0);
+  }
+
+  100% {
+    transform: translateX(5vw) rotate(-4deg) translateY(20px);
+  }
+}
+
+/* ================================================================
    PAGE SHELL
    ================================================================ */
 

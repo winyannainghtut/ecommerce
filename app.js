@@ -325,7 +325,7 @@ function createFallbackImage(label) {
         y="50%"
         dominant-baseline="middle"
         text-anchor="middle"
-        font-family="Padauk, Arial, sans-serif"
+        font-family="Alegreya, Georgia, serif"
         font-size="42"
         font-weight="700"
         fill="#1f3f8b"
